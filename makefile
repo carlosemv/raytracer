@@ -1,13 +1,13 @@
 # commands
 CXX = g++
-DEL = rm
+DEL = rm -f
 
 # options
 DEBUG = -g
 WARNING = -Wall
 OPTMIZE = -O3
 STD = -std=c++14
-OPTIONSCXX = $(STD) $(WARNING) $(OPTMIZE)
+CXXFLAGS = $(STD) $(WARNING) $(OPTMIZE)
 
 #libraries
 LIBS = -lboost_program_options
@@ -19,26 +19,18 @@ BINDIR = ./bin/
 
 EXEC = raytracer
 
-### executable target
-main: bin Camera.o Lambertian.o Metal.o HitableList.o Sphere.o RayTracer.o main.o
-	$(CXX) $(BINDIR)Camera.o $(BINDIR)Lambertian.o $(BINDIR)Metal.o $(BINDIR)HitableList.o \
-	$(BINDIR)Sphere.o $(BINDIR)RayTracer.o $(BINDIR)main.o -o $(EXEC) $(OPTIONSCXX) $(LIBS)
+_OBJ = Camera.o Lambertian.o Metal.o HitableList.o Sphere.o RayTracer.o main.o
+OBJ = $(patsubst %,$(BINDIR)%,$(_OBJ))
 
-### bin folder (created only if it doesnt exist)
+### executable target
+main: bin $(OBJ)
+	$(CXX) $(OBJ) -o $(EXEC) $(CXXFLAGS) $(LIBS)
+
 bin:
 	mkdir -p ./bin/
 
-%.o: $(SRCDIR)%.cpp
-	$(CXX) -c $< -o $(BINDIR)$@ $(OPTIONSCXX) $(DECLRDIR)
-
-main.o: $(SRCDIR)main.cpp
-Camera.o: $(SRCDIR)Camera.cpp
-Lambertian.o: $(SRCDIR)Lambertian.cpp
-Metal.o: $(SRCDIR)Metal.cpp
-HitableList.o: $(SRCDIR)HitableList.cpp
-Sphere.o: $(SRCDIR)Sphere.cpp
-RayTracer.o: $(SRCDIR)RayTracer.cpp
-
+$(BINDIR)%.o: $(SRCDIR)%.cpp
+	$(CXX) -c $< -o $@ $(CXXFLAGS) $(DECLRDIR)
 
 ### clear objects & executable
 clean: bin
